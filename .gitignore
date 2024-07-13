@@ -9,3 +9,12 @@ src/**/*.json
 
 # Program Files
 assets/logs
+
+# Certificate files (This uses HTTPS)
+*.pem
+*.crt
+*.cer
+*.key
+*.pfx
+*.p12
+*.der
