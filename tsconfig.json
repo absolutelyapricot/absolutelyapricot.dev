@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "resolveJsonModule": true,
+    "newLine": "LF",
+    "rootDir": "src",
+    "outDir": "dist",
+    "skipLibCheck": true
+  },
+  "exclude": [
+    "node_modules",
+    "dist"
+  ],
+  "watchOptions": {
+    "excludeDirectories": [
+      "**/node_modules",
+      "dist"
+    ]
+  }
+}

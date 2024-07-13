@@ -1,0 +1,11 @@
+# NPM
+.husky
+node_modules
+
+# Build files
+dist
+src/**/*.json
+^src/**/*-prod.json
+
+# Program Files
+assets/logs

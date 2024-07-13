@@ -1,0 +1,35 @@
+{
+  "version": "0.0.1",
+  "dependencies": {
+    "als-send": "1.0.1",
+    "cookie-parser": "1.4.6",
+    "csrf-csrf": "3.0.6",
+    "express": "4.19.2",
+    "helmet": "7.1.0",
+    "mysql2": "3.10.2",
+    "sequelize": "6.37.3",
+    "typescript": "5.5.3",
+    "winston": "3.13.1",
+    "winston-daily-rotate-file": "5.0.0"
+  },
+  "devDependencies": {
+    "eslint": "9.7.0",
+    "eslint-config-prettier": "9.1.0",
+    "globals": "15.8.0",
+    "husky": "9.0.11",
+    "lint-staged": "15.2.7",
+    "prettier": "3.3.2",
+    "typescript-eslint": "8.0.0-alpha.10"
+  },
+  "lint-staged": {
+    "*.js": "eslint --cache --fix",
+    "*.{js,css,md}": "prettier --write"
+  },
+  "scripts": {
+    "prepare": "husky install",
+    "prestart": "npx tsc -b",
+    "start": "cd dist && node index.js",
+    "lint": "npx prettier --write ./src && eslint ./src",
+    "clean": "npx tsc -b --clean"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "configurations": [
+    {
+      // Works for most use cases
+      "name": "Build & Run Program",
+      "program": "npm: start",
+      "request": "launch",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "preLaunchTask": "npm: prestart",
+      "type": "node"
+    },
+    {
+      // Best used with tsc in the watch mode
+      // npx tsc -w
+      "name": "Run Program",
+      "program": "node index.js",
+      "request": "launch",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "cwd": "${workspaceFolder}/dist",
+      "type": "node"
+    },
+    {
+      "name": "Launch Program",
+      "program": "npm: clean",
+      "request": "launch",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "type": "node"
+    }
+  ]
+}
