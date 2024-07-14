@@ -1,0 +1,5 @@
+# Files to not be scanned
+exclude:
+  global:
+    - dist/**
+    - node_modules/**

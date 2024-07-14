@@ -8,7 +8,7 @@ src/**/*.json
 ^src/**/*-prod.json
 
 # Program Files
-assets/logs
+logs
 
 # Certificate files (This uses HTTPS)
 *.pem

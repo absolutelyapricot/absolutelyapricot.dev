@@ -23,5 +23,10 @@ export interface RouteFile {
 
 export interface CustomExpress extends Express {
   /** @desc Logging object */
-  stdrr: Logger;
+  stdrr?: Logger;
+  /** @desc Extension of the locals object */
+  locals: {
+    /** @desc Functions for the app */
+    functions?: Map<string, FunctionFile>;
+  }
 }

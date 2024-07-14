@@ -32,6 +32,8 @@
   "scripts": {
     "prepare": "husky install",
     "prestart": "npx tsc -b",
+    "postinstall": "mkdir logs",
+    "postuninstall": "rm -rf logs",
     "start": "cd dist && node index.js",
     "lint": "npx prettier --write ./src && eslint ./src",
     "clean": "npx tsc -b --clean"

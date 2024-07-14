@@ -4,11 +4,11 @@ const methods = new Map();
 
 /** @desc Loads the route properly */
 async function loadRoute(server: CustomExpress, route: RouteFile): Promise<void> {
-  // Register the route with Express and the methods map
-  for (const method of route.methods) {
-    server[method](route.paths, route.execute);
+  // Register the routes. Flatten the array or create one if needed
+  for (const method of [route.methods].flat()) {
+    server[method.toLowerCase()](route.paths, route.execute);
   }
-  for(const path of route.paths) {
+  for(const path of [route.paths].flat()) {
     methods.set(path, route.methods);
   }
 }
@@ -33,11 +33,12 @@ export async function execute(server: CustomExpress): Promise<void> {
     .map((f) => import(`../../routes/${f}`));
   const routeHandlers = await Promise.allSettled(promises);
 
-  // We pass all failed promises to an error handler
+  // allSettled provides a list of promises and their statuses
   routeHandlers
     .filter((f) => f.status !== 'fulfilled')
     .forEach((f) => server.stdrr.error(`Failed to load route handler`, { err: f }));
 
+  // loadRoute can register the commands when passed a RouteFile
   server.stdrr.debug(`Found ${routes.length} routes`);
   for (const route of routes) {
     try {
@@ -49,5 +50,12 @@ export async function execute(server: CustomExpress): Promise<void> {
     } catch (err) {
       server.stdrr.error(`Failed to load ${route}`, { err });
     }
+  }
+
+  for (const [path, method] of methods) {
+    server.options(path, (_req, res) => {
+      res.setHeader('Access-Control-Allow-Methods', method.join(', '));
+      res.status(204).send();
+    })
   }
 }
