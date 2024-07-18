@@ -1,0 +1,31 @@
+name: Website Deployment
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+concurrency:
+  group: deployment
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: linux
+    env:
+      # Absolute path to config folder
+      config: ${{ secrets.CONFIG }}
+      # Absolute path to your assets folder
+      assets: ${{ secrets.ASSETS }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Pull containers
+        run: docker compose pull
+
+      - name: Build files
+        run: docker compose build
+
+      - name: Start server
+        run: docker compose up -d

@@ -1,0 +1,12 @@
+version: '3.3'
+services:
+  app:
+    build:
+      context: ./
+    restart: on-failure
+    ports:
+      # TODO: Consider not forcing port 443 usage for reverse proxies
+      - 443:443
+    volumes:
+      - ${assets}:/usr/src/absolutelyapricot.dev/assets:rw
+      - ${config}:/usr/src/absolutelyapricot.dev/config:r

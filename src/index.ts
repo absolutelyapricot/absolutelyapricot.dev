@@ -5,13 +5,14 @@ import helmet from 'helmet';
 import { readFileSync } from 'node:fs';
 import { createServer } from 'node:https';
 import * as uuid from 'uuid';
-import { execute as loadFunctions } from './functions/loader.js';
-import { default as serverConfig } from './configs/server.json' assert { type: 'json' };
 import { default as winston } from 'winston';
-import { CustomExpress } from './typings/Extensions.js';
 import 'winston-daily-rotate-file';
+import { default as serverConfig } from './configs/server.json' assert { type: 'json' };
+import { execute as loadFunctions } from './functions/loader.js';
+import { ExtendLocals } from './typings/Extensions.js';
 
 if (process.env.NODE_ENV === 'development') console.warn('Server is running in development mode!');
+const locals: ExtendLocals = {};
 
 //#region Middleware
 const rotateOptions = {
@@ -37,6 +38,7 @@ const logger = winston.createLogger({
     })
   ]
 });
+locals.logger = logger;
 
 const { doubleCsrfProtection } = doubleCsrf({
   cookieName: 'x-csrf-token',
@@ -52,8 +54,7 @@ const { doubleCsrfProtection } = doubleCsrf({
 
 //#region Setup
 // deepcode ignore UseCsurfForExpress: Implemented through csrf-csrf
-const server: CustomExpress = express();
-server.stdrr = logger;
+const server = express();
 server.disable('x-powered-by');
 server.use(cookieParser());
 server.use(doubleCsrfProtection);
@@ -66,14 +67,19 @@ server.use(
     }
   })
 );
-//#endregion
+// Inject variables
+server.use((_req, res, next) => {
+  res.locals = locals
+  next();
+});
 
 // Functions are loaded through the loader.js file
 // and ready functions are run when done with loading
-server.locals.functions = await loadFunctions(server);
-[...server.locals.functions.entries()]
-  .filter(([name]) => name.startsWith('ready'))
-  .forEach(([, data]) => data.execute(server));
+locals.functions = await loadFunctions(server, logger);
+[...locals.functions.entries()]
+.filter(([name]) => name.startsWith('ready'))
+.forEach(([, data]) => data.execute(server, logger));
+//#endregion
 
 const PORT = process.env.NODE_ENV === 'development' ? 3000 : 443;
 createServer(

@@ -1,9 +1,11 @@
+import { Express } from 'express';
 import { existsSync, readdirSync } from 'node:fs';
-import { CustomExpress, RouteFile } from '../../typings/Extensions.js';
+import { Logger } from 'winston';
+import { RouteFile } from '../../typings/Extensions.js';
 const methods = new Map();
 
 /** @desc Loads the route properly */
-async function loadRoute(server: CustomExpress, route: RouteFile): Promise<void> {
+async function loadRoute(server: Express, route: RouteFile): Promise<void> {
   // Register the routes. Flatten the array or create one if needed
   for (const method of [route.methods].flat()) {
     server[method.toLowerCase()](route.paths, route.execute);
@@ -14,13 +16,13 @@ async function loadRoute(server: CustomExpress, route: RouteFile): Promise<void>
 }
 
 export const name = 'routes';
-export async function execute(server: CustomExpress): Promise<void> {
+export async function execute(server: Express, logger: Logger): Promise<void> {
   if (!existsSync('./routes')) {
-    server.stdrr.warn('Failed to find files in ./routes');
+    logger.warn('Failed to find files in ./routes');
     return;
   }
 
-  server.stdrr.debug('Loading all routes');
+  logger.debug('Loading all routes');
   const routes = readdirSync('./routes', { recursive: true })
     .map((f: unknown) => String(f))
     .map((f: string) => f.replace('./routes/', ''))
@@ -36,10 +38,10 @@ export async function execute(server: CustomExpress): Promise<void> {
   // allSettled provides a list of promises and their statuses
   routeHandlers
     .filter((f) => f.status !== 'fulfilled')
-    .forEach((f) => server.stdrr.error(`Failed to load route handler`, { err: f }));
+    .forEach((f) => logger.error(`Failed to load route handler`, { err: f }));
 
   // loadRoute can register the commands when passed a RouteFile
-  server.stdrr.debug(`Found ${routes.length} routes`);
+  logger.debug(`Found ${routes.length} routes`);
   for (const route of routes) {
     try {
       // Skip archives
@@ -48,7 +50,7 @@ export async function execute(server: CustomExpress): Promise<void> {
       if (func.isHandler) continue;
       loadRoute(server, func);
     } catch (err) {
-      server.stdrr.error(`Failed to load ${route}`, { err });
+      logger.error(`Failed to load ${route}`, { err });
     }
   }
 

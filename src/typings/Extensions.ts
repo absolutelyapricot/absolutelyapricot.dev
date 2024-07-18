@@ -1,11 +1,11 @@
-import { Router, Express, Response, NextFunction } from 'express';
+import { Express, NextFunction, Response, Router } from 'express';
 import { Logger } from 'winston';
 
 export interface FunctionFile {
   /** @desc Name of the function */
   name: string;
   /** @desc Function to execute */
-  execute: (server: Router, ...args: unknown[]) => Promise<unknown>
+  execute: (server: Router, logger: Logger, ...args: unknown[]) => Promise<unknown>
 }
 
 export interface RouteFile {
@@ -21,12 +21,18 @@ export interface RouteFile {
   execute: (req: Request, res: Response, next: NextFunction) => Promise<unknown>
 }
 
+/** @desc Extends the locals property on available objects */
+export type ExtendLocals = {
+  /** @desc Winston {@link Logger} for logging. Use {@link Response#locals} in routes */
+  logger?: Logger;
+  /** @desc Functions for the app */
+  functions?: Map<string, FunctionFile>;
+}
+
+/** @deprecated Consider passing the logger as a variable */
 export interface CustomExpress extends Express {
-  /** @desc Logging object */
-  stdrr?: Logger;
-  /** @desc Extension of the locals object */
-  locals: {
-    /** @desc Functions for the app */
-    functions?: Map<string, FunctionFile>;
-  }
+  locals: ExtendLocals;
+}
+export interface CustomResponse extends Response {
+  locals: ExtendLocals;
 }
