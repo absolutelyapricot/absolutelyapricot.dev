@@ -2,6 +2,7 @@ import { default as cookieParser } from 'cookie-parser';
 import { doubleCsrf } from 'csrf-csrf';
 import { default as express } from 'express';
 import helmet from 'helmet';
+import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { createServer } from 'node:https';
 import * as uuid from 'uuid';
@@ -15,6 +16,7 @@ if (process.env.NODE_ENV === 'development') console.warn('Server is running in d
 const locals: ExtendLocals = {};
 
 //#region Middleware
+const processHash = createHash('sha1').update(new Date().toISOString()).digest('hex').slice(0, 8);
 const rotateOptions = {
   datePattern: 'DD-MM-YYYY',
   zippedArchive: true,
@@ -24,20 +26,22 @@ const rotateOptions = {
 const logger = winston.createLogger({
   level: 'info',
   format: winston.format.json(),
-  defaultMeta: { service: 'user-service' },
+  defaultMeta: { service: processHash },
   transports: [
     new winston.transports.DailyRotateFile({
       ...rotateOptions,
       filename: '../logs/website-err-%DATE%.log',
-      level: 'info'
+      level: 'error'
     }),
     new winston.transports.DailyRotateFile({
       ...rotateOptions,
       filename: '../logs/website-std-%DATE%.log',
-      level: 'error'
+      level: process.env.NODE_ENV === 'development' ? 'debug' : 'info'
     })
   ]
 });
+logger.log('info', new Array(32).fill('-').join(''));
+logger.log('info', `Webserver starting up at ${new Date().toString()}`);
 locals.logger = logger;
 
 const { doubleCsrfProtection } = doubleCsrf({
@@ -56,6 +60,7 @@ const { doubleCsrfProtection } = doubleCsrf({
 // deepcode ignore UseCsurfForExpress: Implemented through csrf-csrf
 const server = express();
 server.disable('x-powered-by');
+server.set('hash', processHash);
 server.use(cookieParser());
 server.use(doubleCsrfProtection);
 server.use(
@@ -69,7 +74,7 @@ server.use(
 );
 // Inject variables
 server.use((_req, res, next) => {
-  res.locals = locals
+  res.locals = locals;
   next();
 });
 
@@ -77,8 +82,8 @@ server.use((_req, res, next) => {
 // and ready functions are run when done with loading
 locals.functions = await loadFunctions(server, logger);
 [...locals.functions.entries()]
-.filter(([name]) => name.startsWith('ready'))
-.forEach(([, data]) => data.execute(server, logger));
+  .filter(([name]) => name.startsWith('ready'))
+  .forEach(([, data]) => data.execute(server, logger));
 //#endregion
 
 const PORT = process.env.NODE_ENV === 'development' ? 3000 : 443;

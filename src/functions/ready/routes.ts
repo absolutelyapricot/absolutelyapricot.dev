@@ -40,21 +40,23 @@ export async function execute(server: Express, logger: Logger): Promise<void> {
     .filter((f) => f.status !== 'fulfilled')
     .forEach((f) => logger.error(`Failed to load route handler`, { err: f }));
 
+  const remainingRoutes: RouteFile[] = routeHandlers
+    .filter((f) => f.status === 'fulfilled')
+    .sort((a, b) => a.value.priority + b.value.priority)
+    .map((v) => v.value);
+
   // loadRoute can register the commands when passed a RouteFile
-  logger.debug(`Found ${routes.length} routes`);
-  for (const route of routes) {
+  logger.debug(`Found ${remainingRoutes.length} routes`);
+  for (const route of remainingRoutes) {
     try {
-      // Skip archives
-      if (route.startsWith('archive_')) continue;
-      const func: RouteFile = await import(`../../routes/${route}`);
-      if (func.isHandler) continue;
-      loadRoute(server, func);
+      if (route.isHandler) continue;
+      loadRoute(server, route);
     } catch (err) {
       logger.error(`Failed to load ${route}`, { err });
     }
   }
 
-  for (const [path, method] of methods) {
+  for (const [path, method] of methods.entries()) {
     server.options(path, (_req, res) => {
       res.setHeader('Access-Control-Allow-Methods', method.join(', '));
       res.status(204).send();
