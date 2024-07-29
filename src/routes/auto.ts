@@ -4,7 +4,7 @@ import { CustomResponse } from '../typings/Extensions.js';
 
 const files = [];
 if (existsSync('../assets')) {
-  const assets = readdirSync('../assets', { recursive: true })
+  const assets = readdirSync('../assets/html', { recursive: true })
     .filter((f) => typeof f === 'string')
     .filter((f) => f.endsWith('.html'))
     .map((f) => '/'+f.replace('.html', ''));
@@ -15,9 +15,9 @@ export const paths = files;
 export const methods = 'get';
 export const priority = 0;
 export async function execute(req: Request, res: CustomResponse, next: NextFunction) {
-  //? This needs better security
+  // TODO: This needs some better security to prevent directory traversal
   if (files.includes(req.path)) {
-    res.status(200).sendFile(`${req.path}.html`, { root: '../assets' });
+    res.status(200).sendFile(`${req.path}.html`, { root: '../assets/html' });
   } else {
     res.set('X-Skipped', 'true');
     next('route');

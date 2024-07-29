@@ -1,0 +1,38 @@
+/* Lab Fox colurs */
+* {
+  --background: #2e2e2e;
+  --foreground: #ffffff;
+  --selection-background: #cb392e;
+  --cursor: #7f7f7f;
+
+  --brightRed: #ff6517;
+  --brightYellow: #fca013;
+  --brightGreen: #53eaa8;
+  --brightCyan: #7d53e7;
+  --brightBlue: #db501f;
+  --brightPurple: #441090;
+  --brightWhite: #ffffff;
+  --brightBlack: #464646;
+
+  --red: #fc6d26;
+  --yellow: #fca121;
+  --green: #3eb383;
+  --cyan: #6e49cb;
+  --blue: #db3b21;
+  --purple: #380d75;
+  --white: #ffffff;
+  --black: #2e2e2e;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+#cursor {
+  color: var(--cursor);
+}
+
+.selection {
+  background: var(--selection-background);
+}

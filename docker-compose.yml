@@ -5,8 +5,8 @@ services:
       context: ./
     restart: on-failure
     ports:
-      # TODO: Consider not forcing port 443 usage for reverse proxies
-      - 443:443
+      - 443:${port}
     volumes:
+      # Since we have multiple config files, we cannot use secrets
       - ${assets}:/usr/src/absolutelyapricot.dev/assets:rw
       - ${config}:/usr/src/absolutelyapricot.dev/config:r

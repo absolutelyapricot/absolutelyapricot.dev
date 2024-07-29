@@ -7,9 +7,10 @@ COPY tsconfig.json ./
 COPY src ./src
 RUN npm run prestart
 
-# Symlink our directories imported from GitHub env
+# Symlink our directories then copy the files
 RUN ln -s /src/assets ./assets
 RUN ln -s /src/config ./config
+RUN mv /src/assets/* ./assets
 
 EXPOSE 443
 EXPOSE 80
